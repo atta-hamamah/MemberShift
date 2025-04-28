@@ -14,13 +14,18 @@ export default async function Header() {
         </Link>
         <div className="flex items-center space-x-4">
           {user && (
-            <Link href="/post-membership" className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100">
-              Post Membership
-            </Link>
+            <>
+              <Link href="/my-listings" className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100">
+                My Listings
+              </Link>
+              <Link href="/post-membership" className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100">
+                Post Membership
+              </Link>
+            </>
           )}
           <AuthButton user={user} />
         </div>
       </nav>
     </header>
   );
-} 
+}

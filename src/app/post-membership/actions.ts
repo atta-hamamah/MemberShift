@@ -57,4 +57,60 @@ export async function createListing(formData: FormData) {
 
   // Redirect to home page after successful submission
   redirect('/?message=Listing posted successfully!')
-} 
+}
+
+export async function deleteListing(listingId: string) {
+  const supabase = createClient()
+  console.log('Attempting to delete listing with ID:', listingId)
+
+  // Check if user is authenticated
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    throw new Error('You must be logged in to delete a listing')
+  }
+
+  // Verify the listing exists and get its details
+  const { data: listing, error: fetchError } = await supabase
+    .from('listings')
+    .select('*')
+    .eq('id', listingId)
+    .single()
+
+  if (fetchError) {
+    console.error('Error fetching listing:', fetchError)
+    throw new Error(`Listing not found: ${fetchError.message}`)
+  }
+
+  if (!listing) {
+    console.error('No listing found with ID:', listingId)
+    throw new Error('Listing not found')
+  }
+
+  console.log('Found listing:', listing)
+  console.log('Current user ID:', user.id)
+  console.log('Listing owner ID:', listing.user_id)
+
+  if (listing.user_id !== user.id) {
+    throw new Error('You do not have permission to delete this listing')
+  }
+
+  // Delete the listing
+  const { error } = await supabase
+    .from('listings')
+    .delete()
+    .eq('id', listingId)
+
+  console.log('Deletion response:', { error })
+
+  if (error) {
+    console.error('Error deleting listing:', error)
+    throw new Error(`Failed to delete listing: ${error.message}`)
+  }
+
+  // Revalidate all pages that show listings
+  revalidatePath('/')
+  revalidatePath('/my-listings')
+
+  // Explicitly return the success object
+  return { success: true }
+}

@@ -27,8 +27,8 @@ export default function PostMembershipForm() {
 
   const handleFormSubmit = async (formData: FormData) => {
     startTransition(async () => {
-        await createListing(formData);
-        // Redirect or error handling is done within the server action
+      await createListing(formData);
+      // Redirect or error handling is done within the server action
     });
   };
 
@@ -59,7 +59,7 @@ export default function PostMembershipForm() {
       {/* Conditional Location Fields */}
       {type === 'Physical' && (
         <div className="space-y-4 p-4 border border-gray-200 rounded-md bg-gray-50">
-           <h3 className="text-lg font-medium leading-6 text-gray-900">Location Details (for Physical)</h3>
+          <h3 className="text-lg font-medium leading-6 text-gray-900">Location Details (for Physical)</h3>
           <div>
             <label htmlFor="country" className="block text-sm font-medium text-gray-700">Country *</label>
             <input type="text" id="country" name="country" required className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" />
@@ -111,7 +111,7 @@ export default function PostMembershipForm() {
         <textarea id="description" name="description" rows={4} maxLength={500} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"></textarea>
       </div>
 
-       {/* Condition */}
+      {/* Condition */}
       <div>
         <label htmlFor="condition" className="block text-sm font-medium text-gray-700">Condition *</label>
         <select
