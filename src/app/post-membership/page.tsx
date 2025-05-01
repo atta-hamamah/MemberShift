@@ -1,8 +1,10 @@
 // Placeholder for Post Membership page
 import Link from 'next/link';
-import PostMembershipForm from '@/components/PostMembershipForm';
+// import PostMembershipForm from '@/components/PostMembershipForm'; // Old import
+import ListingForm from '@/components/ListingForm'; // New import
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
+import { createListing } from './actions'; // Import the server action
 
 export default async function PostMembershipPage() {
   const supabase = createClient();
@@ -19,7 +21,12 @@ export default async function PostMembershipPage() {
         &larr; Back to Home
       </Link>
       <h1 className="text-3xl font-bold mb-6">Post a New Membership</h1>
-      <PostMembershipForm />
+      {/* <PostMembershipForm /> */}
+      <ListingForm
+        action={createListing} // Pass the server action
+        submitButtonText="Post Membership"
+        pendingSubmitButtonText="Posting..."
+      />
     </div>
   );
 } 
