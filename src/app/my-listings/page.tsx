@@ -44,7 +44,11 @@ export default async function MyListingsPage() {
                                 >
                                     Edit
                                 </Link>
-                                <DeleteListingButton listingId={listing.id} />
+                                <DeleteListingButton 
+                                    listingId={listing.id} 
+                                    ownerId={user.id}
+                                    currentUserId={user.id}
+                                />
                             </div>
                         </div>
                     ))}

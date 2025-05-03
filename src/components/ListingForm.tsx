@@ -1,10 +1,12 @@
 'use client'
 
-import { useState, useTransition, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 // Removed direct import of createListing
 // import { createListing } from '../app/post-membership/actions'
 import { useSearchParams } from 'next/navigation'
 import { type z } from 'zod';
+import { useActionState } from 'react';
+import { useFormStatus } from 'react-dom'; // Import form hooks
 
 // Define a type for the expected listing data structure (adjust based on your actual schema)
 type ListingData = {
@@ -25,37 +27,47 @@ type ListingData = {
   // Add other fields as necessary
 };
 
-// Type for server action result, including potential Zod errors
-type ServerActionResult = {
+// Updated ServerActionResult type to match useFormState expectations
+type FormState = {
     success: boolean;
-    message?: string;
-    errors?: z.inferFlattenedErrors<typeof z.any>['fieldErrors']; // Use Zod's flattened error type
+    message?: string | null;
+    errors?: Record<string, string[] | undefined> | null; 
 };
 
 // Type for the action prop
-type FormAction = (formData: FormData) => Promise<ServerActionResult | void>; // Allow void if action redirects
+type FormAction = (prevState: FormState, formData: FormData) => Promise<FormState>;
 
-// Simple Submit Button component to show pending state
+// Submit Button Component using useFormStatus
 function SubmitButton({ text, pendingText }: { text: string, pendingText: string }) {
-  const [isPending] = useTransition(); // Read pending state from parent form transition
+  // useFormStatus must be used within a <form>
+  const { pending } = useFormStatus(); 
+
   return (
     <button
       type="submit"
-      aria-disabled={isPending}
-      disabled={isPending}
+      aria-disabled={pending}
+      disabled={pending}
       className="w-full px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed"
     >
-      {isPending ? pendingText : text}
+      {pending ? pendingText : text}
     </button>
   )
 }
 
 interface ListingFormProps {
   initialData?: ListingData;
-  action: FormAction;
+  // Action needs to conform to useFormState signature: (prevState, formData) => newState
+  action: FormAction; 
   submitButtonText?: string;
   pendingSubmitButtonText?: string;
 }
+
+// Define initial state for the form
+const initialState: FormState = {
+    success: false,
+    message: null,
+    errors: null
+};
 
 export default function ListingForm({
   initialData = {},
@@ -63,12 +75,11 @@ export default function ListingForm({
   submitButtonText = 'Submit',
   pendingSubmitButtonText = 'Submitting...'
 }: ListingFormProps) {
-  const [type, setType] = useState(initialData.type || 'Online'); // Default to Online or initial data
-  const [isPending, startTransition] = useTransition();
-  const [formError, setFormError] = useState<string | null>(null);
-  const [fieldErrors, setFieldErrors] = useState<z.inferFlattenedErrors<typeof z.any>['fieldErrors'] | null>(null);
+  const [type, setType] = useState(initialData.type || 'Online'); 
+  
+  // Use useActionState instead of useFormState
+  const [state, formAction] = useActionState(action, initialState);
 
-  // Update local type state if initialData changes (e.g., on client-side nav)
   useEffect(() => {
     if (initialData.type) {
       setType(initialData.type);
@@ -86,38 +97,21 @@ export default function ListingForm({
     }
   };
 
-  const handleFormSubmit = async (formData: FormData) => {
-    startTransition(async () => {
-      setFormError(null); // Clear previous errors
-      setFieldErrors(null);
-
-      const result = await action(formData);
-
-      if (result && !result.success) {
-        setFormError(result.message || 'An error occurred.');
-        if (result.errors) {
-           // Now directly use the flattened errors
-           setFieldErrors(result.errors);
-        }
-      }
-      // On success, the action should handle redirection or provide a success message.
-      // If redirecting, this component might unmount before state updates fully.
-    });
-  };
-
-  // Helper to display field errors
+  // Update displayFieldError to use the state from useFormState
   const displayFieldError = (fieldName: string) => {
-    const errorsForField = fieldErrors?.[fieldName as keyof typeof fieldErrors];
-    return errorsForField ? (
+    const errorsForField = state.errors?.[fieldName];
+    return Array.isArray(errorsForField) && errorsForField.length > 0 ? (
         <p className="mt-1 text-xs text-red-600">{errorsForField.join(', ')}</p>
     ) : null;
   }
 
   return (
-    <form action={handleFormSubmit} className="space-y-6 bg-white p-8 rounded-lg shadow-md border">
-      {formError && !fieldErrors && (
-        <div className="p-3 mb-4 text-sm text-red-700 bg-red-100 rounded-lg border border-red-300">
-          <strong>Error:</strong> {formError}
+    // Pass the formAction dispatcher from useActionState to the form
+    <form action={formAction} className="space-y-6 bg-white p-8 rounded-lg shadow-md border">
+      {/* Display general form message/error from state */}
+      {state.message && !state.errors && (
+        <div className={`p-3 mb-4 text-sm rounded-lg border ${state.success ? 'text-green-700 bg-green-100 border-green-300' : 'text-red-700 bg-red-100 border-red-300'}`}>
+          {state.success ? 'Success:' : 'Error:'} {state.message}
         </div>
       )}
 
@@ -247,7 +241,6 @@ export default function ListingForm({
       </div>
 
       {/* Submit Button */}
-      {/* Pass button text props */}
       <SubmitButton text={submitButtonText} pendingText={pendingSubmitButtonText} />
 
     </form>

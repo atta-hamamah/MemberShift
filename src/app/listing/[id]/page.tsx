@@ -42,17 +42,32 @@ export default async function ListingDetailsPage({ params }: ListingDetailsPageP
     notFound(); // Triggers the nearest not-found.tsx page (or default Next.js 404)
   }
 
+  // Check if the current user is the owner of the listing
+  const isOwner = user?.id === listing.user_id;
+
   return (
     <div className="w-full max-w-3xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <Link href="/" className="text-blue-600 hover:underline">
           &larr; Back to Listings
         </Link>
-        <DeleteListingButton
-          listingId={listing.id}
-          ownerId={listing.user_id}
-          currentUserId={user?.id}
-        />
+        
+        {/* Conditionally render Edit and Delete buttons for the owner */}
+        {isOwner && (
+          <div className="flex space-x-3">
+            <Link 
+              href={`/listing/${listing.id}/edit`}
+              className="px-4 py-2 text-sm bg-gray-600 text-white rounded-md hover:bg-gray-700"
+            >
+                Edit
+            </Link>
+            <DeleteListingButton
+              listingId={listing.id}
+              ownerId={listing.user_id}
+              currentUserId={user?.id}
+            />
+          </div>
+        )}
       </div>
 
       <div className="bg-white p-6 sm:p-8 rounded-lg shadow-md border">
