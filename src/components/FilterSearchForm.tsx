@@ -66,9 +66,15 @@ export default function FilterSearchForm() {
   return (
     <div className="space-y-5">
       {/* Search Input */}
-      <div className="relative">
-         <label htmlFor="search-query" className="sr-only">Search Listings</label>
-         <input
+      <div className="flex flex-col md:flex-row md:items-end gap-4 bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+        <div className="relative flex-grow">
+          <label htmlFor="search-query" className="block text-sm font-medium text-gray-700 mb-2">
+            <span className="flex items-center gap-1">
+              <MagnifyingGlassIcon className="h-4 w-4 text-blue-500" aria-hidden="true" />
+              Search
+            </span>
+          </label>
+          <input
             type="text"
             id="search-query"
             name="query" // Name matches the search param key
@@ -76,17 +82,12 @@ export default function FilterSearchForm() {
             defaultValue={searchParams.get('query') || ''} // Set initial value from URL
             onChange={handleSearchChange} // Use debounced handler
             disabled={isPending}
-            className="input pl-10 focus:border-blue-500 transition-all duration-200"
-        />
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-             <MagnifyingGlassIcon className="h-5 w-5 text-blue-500" aria-hidden="true" />
+            className="input focus:border-blue-500 transition-all duration-200"
+          />
         </div>
-      </div>
 
-      {/* Filters Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5">
         {/* Type Filter */}
-        <div>
+        <div className="md:w-48">
           <label htmlFor="filter-type" className="block text-sm font-medium text-gray-700 mb-2">
             <span className="flex items-center gap-1">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -110,7 +111,7 @@ export default function FilterSearchForm() {
         </div>
 
         {/* Category Filter */}
-        <div>
+        <div className="md:w-48">
           <label htmlFor="filter-category" className="block text-sm font-medium text-gray-700 mb-2">
             <span className="flex items-center gap-1">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -134,45 +135,44 @@ export default function FilterSearchForm() {
           </select>
         </div>
 
-         {/* Location Filter (only if Physical type is selected or no type filter) */}
-         {(searchParams.get('type') === 'Physical' || !searchParams.get('type')) && (
-            <div>
-              <label htmlFor="filter-location" className="block text-sm font-medium text-gray-700 mb-2">
-                <span className="flex items-center gap-1">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  Location
-                </span>
-              </label>
-               <input
-                type="text"
-                id="filter-location"
-                name="location" // Name matches the search param key
-                placeholder="e.g., London"
-                defaultValue={searchParams.get('location') || ''} // Set initial value from URL
-                onChange={handleSearchChange} // Debounced is fine here too
-                disabled={isPending || searchParams.get('type') === 'Online'} // Disable if Online is explicitly selected
-                className="input focus:border-blue-500 transition-all duration-200 disabled:opacity-50 disabled:bg-gray-100"
-              />
-          </div>
-         )}
-
-        {/* Clear Filters Button */} 
-         <div className="flex items-end">
-            <button
-                onClick={clearFilters}
-                disabled={isPending || !searchParams.toString()}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 hover:border-blue-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+        {/* Location Filter (only if Physical type is selected or no type filter) */}
+        {(searchParams.get('type') === 'Physical' || !searchParams.get('type')) && (
+          <div className="md:w-48">
+            <label htmlFor="filter-location" className="block text-sm font-medium text-gray-700 mb-2">
+              <span className="flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
-                Clear Filters
-            </button>
-        </div>
+                Location
+              </span>
+            </label>
+            <input
+              type="text"
+              id="filter-location"
+              name="location" // Name matches the search param key
+              placeholder="e.g., London"
+              defaultValue={searchParams.get('location') || ''} // Set initial value from URL
+              onChange={handleSearchChange} // Debounced is fine here too
+              disabled={isPending || searchParams.get('type') === 'Online'} // Disable if Online is explicitly selected
+              className="input focus:border-blue-500 transition-all duration-200 disabled:opacity-50 disabled:bg-gray-100"
+            />
+          </div>
+        )}
 
+        {/* Clear Filters Button */}
+        <div className="md:self-end">
+          <button
+            onClick={clearFilters}
+            disabled={isPending || !searchParams.toString()}
+            className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 hover:border-blue-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            Clear
+          </button>
+        </div>
       </div>
        {isPending && 
         <div className="flex items-center justify-center gap-2 text-sm text-blue-600 bg-blue-50 p-2 rounded-md border border-blue-100">
